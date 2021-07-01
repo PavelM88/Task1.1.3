@@ -28,8 +28,7 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void dropUsersTable() {
         String sql = "DROP TABLE IF exists users";
-        try {
-            PreparedStatement ps = Util.getMySQLConnection().prepareStatement(sql);
+        try(PreparedStatement ps = Util.getMySQLConnection().prepareStatement(sql)) {
             ps.execute();
         } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
@@ -38,14 +37,11 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void saveUser(String name, String lastName, byte age) {
         String sql = "INSERT INTO users (name, lastName, age) VALUES (?,?,?);";
-        try (Connection connection = Util.getMySQLConnection()) {
-            PreparedStatement ps = connection.prepareStatement(sql);
-            connection.setAutoCommit(false);
+        try (PreparedStatement ps = Util.getMySQLConnection().prepareStatement(sql)) {
             ps.setString(1, name);
             ps.setString(2, lastName);
             ps.setByte(3, age);
             ps.executeUpdate();
-            connection.commit();
         } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
         }
@@ -53,11 +49,8 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void removeUserById(long id) {
         String sql = "DELETE FROM users WHERE id = " + id;
-        try (Connection connection = Util.getMySQLConnection()) {
-            connection.setAutoCommit(false);
-            PreparedStatement ps = connection.prepareStatement(sql);
+        try (PreparedStatement ps  = Util.getMySQLConnection().prepareStatement(sql)) {
             ps.executeUpdate();
-            connection.commit();
         } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
         }
@@ -66,9 +59,7 @@ public class UserDaoJDBCImpl implements UserDao {
     public List<User> getAllUsers() {
         List<User> usersList = new ArrayList<>();
         String sql = "SELECT * FROM users";
-        try (Connection connection = Util.getMySQLConnection()) {
-            Statement ps = connection.createStatement();
-            connection.setAutoCommit(false);
+        try (Statement ps = Util.getMySQLConnection().createStatement()) {
             ResultSet resultSet = ps.executeQuery(sql);
             while (resultSet.next()) {
                 long id = resultSet.getLong("id");
@@ -78,9 +69,7 @@ public class UserDaoJDBCImpl implements UserDao {
                 User user = new User(name, lastName, age);
                 user.setId(id);
                 usersList.add(user);
-                connection.commit();
             }
-
         } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
         }
@@ -89,11 +78,8 @@ public class UserDaoJDBCImpl implements UserDao {
 
     public void cleanUsersTable() {
         String sql = "DELETE FROM users";
-        try (Connection connection = Util.getMySQLConnection()) {
-            connection.setAutoCommit(false);
-            PreparedStatement ps = connection.prepareStatement(sql);
+        try (PreparedStatement ps = Util.getMySQLConnection().prepareStatement(sql)) {
             ps.executeUpdate();
-            connection.commit();
         } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
         }
